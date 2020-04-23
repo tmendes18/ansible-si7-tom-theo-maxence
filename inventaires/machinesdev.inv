@@ -1,2 +1,7 @@
 [Debian9Developpement]
 symfony4-4048 ansible_user=root
+
+[Debian9Developpement:vars]
+mysql_user=eleve
+mysql_password=btsinfo
+mysql_db=bdeleve
