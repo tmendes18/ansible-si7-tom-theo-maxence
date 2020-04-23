@@ -1,1 +1,35 @@
+- name: Installation d'Apache
+  hosts: all
+  tasks:
+    - name: Inscrire le nouveau dépôt
+      apt_repository:
+        repo: deb http://ftp.fr.debian.org/debian/stretch main
+        state: present
+        update_cache: yes
 
+    - name: Installation d'apache2
+      apt:
+        name: apache2,ca-certificates;apt-transport-https
+        state: present
+
+    - name: Démarrer le service Apache
+      service:
+            name: apache2
+            state: started
+            enabled: yes
+
+    - name: Enregistrer une clé
+      apt_key:
+        url: https://packahes.sury.org/php/apt.pgp
+        state: present
+
+    - name: Autre pakages
+      apt_repository:
+        repo: deb https://packages.sury.org/php/ stretch main
+        state: present
+        update_cache: yes
+        
+    - name: Installation de php7.2
+      apt:
+        name: php7.2
+        state: present
