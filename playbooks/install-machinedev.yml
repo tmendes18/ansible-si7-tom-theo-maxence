@@ -9,7 +9,7 @@
 
     - name: Installation d'apache2
       apt:
-        name: apache2,ca-certificates;apt-transport-https
+        name: apache2, ca-certificates; apt-transport-https
         state: present
 
     - name: Démarrer le service Apache
@@ -58,28 +58,78 @@
          
       - name: Gestion du my.cnf
         copy:
-        src: /root/autres/my.cnf.j2
-        dest: /root/.my.cnf
-        owner: root
-        group: root
-        mode: 0600
+            src: /root/autres/my.cnf.j2
+            dest: /root/.my.cnf
+            owner: root
+            group: root
+            mode: 0600
         
       - name: Gestion du mot de passe du root
         mysql_user:
-        name: root
-        password: btsinfo
-        login_unix_socket: /var/run/mysqld/mysqld.sock 
+            name: root
+            password: btsinfo
+            login_unix_socket: /var/run/mysqld/mysqld.sock 
         
       - name: Création d'une base de données
         mysql_db:
-        name: "{{mysql_db}}"
-        state: present
-        login_unix_socket: /var/run/mysqld/mysqld.sock 
+            name: "{{mysql_db}}"
+            state: present
+            login_unix_socket: /var/run/mysqld/mysqld.sock 
         
       - name: Création de l'utilisateur eleve et affectation des privilèges sur une base de données
         mysql_user:
-        name: "{{mysql_user}}"
-        password: "{{mysql_password}}"
-        host: localhost
-        priv: "{{mysql_db}}.*:ALL,GRANT"
-        login_unix_socket: /var/run/mysqld/mysqld.sock
+            name: "{{mysql_user}}"
+            password: "{{mysql_password}}"
+            host: localhost
+            priv: "{{mysql_db}}.*:ALL,GRANT"
+            login_unix_socket: /var/run/mysqld/mysqld.sock
+        
+- name: PHPMYADMIN Installation
+  hosts: all
+  tasks:
+            
+            - name: Installation de debconf-utils
+              apt:
+                name: debconf-utils
+                state: present
+           
+            - name: Installation de dbconfig
+              debconf:
+                name: phpmyadmin
+                question: phpmyadmin/dbconfig-install
+                value: true
+                vtype: boolean
+              
+            - name: Confirmation du mot de passe
+              debconf:
+                name: phpmyadmin
+                question: phpmyadmin/app-password-confirm
+                value: btsinfo
+                vtype: password
+           
+            - name: Mettre le mot de passe administrateur
+              debconf:
+                name: phpmyadmin
+                question: phpmyadmin/mysql/admin-pass
+                value: btsinfo
+                vtype: password
+              
+            - name: Mettre le mot de passe de l'utilisateur « PhpMyAdmin »
+              debconf:
+                name: phpmyadmin
+                question: phpmyadmin/mysql/app-pass
+                value: btsinfo
+                vtype: password
+              
+            - name: Quel serveur Web doit-on reconfigurer ?
+              debconf:
+                name: phpmyadmin
+                question: phpmyadmin/reconfigure-webserver
+                value: apache2
+                vtype: multiselect
+              
+            - name: Installation phpmyadmin
+              apt:
+                name: phpmyadmin
+                state: present
+                       
